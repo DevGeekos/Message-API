@@ -1,9 +1,10 @@
 # Message-API
 Une API permettant de communiquer à travers deux sites
 
-1. Lancez le fichier api.py
-2. Ouvrez les deux fihiers dans templates
-3. Amusez-vous !
+1. Installez les dépendances
+2. Lancez le fichier api.py (dans backend)
+3. Ouvrez les deux fihiers dans templates
+4. Amusez-vous !
 
 Note : SI vous voulez essayer avec vos amis il vous suffit d'ouvrir le port de l'API (par défaut 5001) au niveau de votre box / routeur, puis de leurs envoyer le sender ou le receiver !
 
