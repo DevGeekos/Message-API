@@ -1,5 +1,5 @@
 # Message-API
-Une API permettant de communiquer à travers deux sites
+Une API permettant d'envoyer des messages entre deux sites
 
 1. Installez les dépendances
 2. Lancez le fichier api.py (dans backend)
