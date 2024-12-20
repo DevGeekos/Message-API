@@ -14,24 +14,6 @@ with open("users.json", "r") as file:
 # Variable pour stocker la dernière donnée reçue
 dernieres_donnees = {}
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    try:
-        data = request.json
-        email = data.get('email')
-        password = data.get('password')
-
-        # Vérification des identifiants pour plusieurs utilisateurs
-        user = next((user for user in USERS if user['email'] == email and user['password'] == password), None)
-
-        if user:
-            return jsonify({"success": True, "message": "Connexion réussie."}), 200
-        return jsonify({"success": False, "message": "Email ou mot de passe incorrect."}), 401
-
-    except Exception as e:
-        print(f"Erreur lors de la connexion : {e}")
-        return jsonify({"success": False, "message": "Erreur interne du serveur."}), 500
-
 @app.route('/api/site-state', methods=['POST', 'GET'])
 def site_state():
     global dernieres_donnees
