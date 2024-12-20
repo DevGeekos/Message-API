@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réception de la requête</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Fond sombre */
+            color: #e0e0e0; /* Texte clair */
+            padding: 20px;
+        }
+        .container {
+            background-color: #1e1e1e; /* Conteneur plus clair que le fond */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+        }
+        .response {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            color: #e0e0e0;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: #e0e0e0;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }      
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Réponse du serveur</h1>
+        <div class="response" id="display-response">En attente de données...</div>
+        <label for="response">Entrez un paramètre :</label>
+        <input type="text" id="response" placeholder="Entrez un texte personnalisé" required>
+        <button id="sendButton">Envoyer</button>
+    </div>
+
+    <!-- Inclusion de la bibliothèque Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Connexion au serveur WebSocket
+        const socket = io('http://127.0.0.1:5001');
+
+        // Écouter les mises à jour du serveur
+        socket.on('update', (data) => {
+            document.getElementById('display-response').innerHTML = data.message;
+        });
+
+        // Optionnel : Initialisation avec les dernières données disponibles via GET
+        async function initializeResponse() {
+            try {
+                const response = await fetch('http://127.0.0.1:5001/api/site-state', {
+                    method: 'GET'
+                });
+                const data = await response.json();
+                document.getElementById('display-response').innerHTML = data.message || "Aucune donnée reçue.";
+            } catch (error) {
+                document.getElementById('display-response').innerHTML = "Erreur lors de la récupération initiale des données.";
+            }
+        }
+
+        // Charger les données initiales
+        initializeResponse();
+    </script>
+
+    <script>
+        // Avant d'envoyer la requête, on vérifie si on a une donnée en localStorage
+        const lastResponse = localStorage.getItem('lastResponse') || '';  // Récupère la dernière valeur
+
+        // Si une donnée est présente, on l'affiche dans le champ de texte
+        document.getElementById('response').value = lastResponse;
+
+        document.getElementById('sendButton').addEventListener('click', sendRequest);
+
+        async function sendRequest(event) {
+            event.preventDefault(); // Empêcher la soumission du formulaire par défaut
+
+            const responseValue = document.getElementById('response').value;
+            sendToApi(responseValue);
+        }
+
+        async function sendPreset(message) {
+            document.getElementById('response').value = message;
+            sendToApi(message);
+        }
+
+        async function sendToApi(responseValue) {
+            if (responseValue) {
+                const data = { parameter: responseValue };
+
+                try {
+                    // Envoyer la requête POST au serveur
+                    const response = await fetch('http://127.0.0.1:5001/api/site-state', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (response.ok) {
+                        const responseData = await response.json();
+                        document.getElementById('display-response').innerHTML = `<strong>Réponse du serveur :</strong> ${responseData.message}`;
+                        localStorage.setItem('lastResponse', responseValue); // Stocker la dernière réponse
+                    } else {
+                        document.getElementById('display-response').innerHTML = `<strong>Erreur du serveur :</strong> ${response.statusText}`;
+                    }
+                } catch (error) {
+                    document.getElementById('display-response').textContent = 'Erreur lors de l\'envoi de la requête.';
+                }
+            } else {
+                document.getElementById('display-response').textContent = 'Veuillez entrer un paramètre.';
+            }
+        }
+    </script>
+
+</body>
+</html>
